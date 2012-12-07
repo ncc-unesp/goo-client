@@ -1,4 +1,4 @@
-#!/usr/bin/evn python2.4
+#!/usr/bin/evn python2.6
 import os
 from gooclient.main import main
 
