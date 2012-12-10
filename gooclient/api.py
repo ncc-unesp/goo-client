@@ -1,14 +1,15 @@
 import slumber
 import requests
+from gooclient.output import Output
 
 class GooApi():
     def __init__(self, config=None):
         if config is None:
             return None
 
+        self.output = Output()
         self.config = config
         self.api = slumber.API(self.config.api_uri)
-        print self.config.api_uri
 
     def request_token(self):
         try:
@@ -19,11 +20,34 @@ class GooApi():
             self.set_token(token['token'])
         except:
             return None
-        return self.token
+        return token['token']
 
     def set_token(self, token):
         self.token = token
 
-    def get_apps(self):
+    def get_apps(self, args):
         apps = self.api.apps.get(token=self.token)
-        return apps['objects']
+        apps = apps['objects']
+
+        fields = [ {'id': 5},
+                   {'name': 30},
+                   {'multi_hosts': 15},
+                   {'multi_thread': 15}]
+
+        self.output.show(fields, apps)
+        return apps
+
+    def get_jobs(self, args):
+        jobs = self.api.jobs.get(token=self.token)
+        jobs = jobs['objects']
+
+        fields = [ {'id': 5},
+                   {'name': 30},
+                   {'priority': 15},
+                   {'progress': 15}]
+
+        self.output.show(fields, jobs)
+        return jobs
+
+    def submit_job(self, args):
+        pass

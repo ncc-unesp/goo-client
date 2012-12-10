@@ -1,5 +1,4 @@
 from ConfigParser import ConfigParser
-from gooclient.api import GooApi
 import os
 import sys
 import requests
@@ -28,25 +27,6 @@ class GooConfig():
 
 
         self.load_global()
-
-        api = GooApi(self)
-
-        # Load global section and token, if token is not found, ask for
-        # credentials and get a new token
-
-        token = self.read_token()
-        if token is None:
-            self.username, self.password = self.get_credentials()
-
-            self.token = api.request_token()
-            if self.token is None:
-                print "Error: Could not get token."
-                print "Aborting..."
-                sys.exit()
-
-            self.save_token(token=self.token)
-
-        api.set_token(token)
 
     def load_global(self):
         # Try to read global section
