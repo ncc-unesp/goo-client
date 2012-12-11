@@ -65,7 +65,6 @@ class GooConfig():
         return username, password
 
     def save_token(self, token):
-        print token
         self.gooconfig.set("auth", "token", token)
 
         f = open(os.path.expanduser(self.config), 'w')

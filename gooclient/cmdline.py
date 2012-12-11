@@ -29,17 +29,25 @@ class GooCmdLine():
 
         # Jobs
         jobs = subparsers.add_parser('jobs', help='jobs help')
-        jobs_subparsers = jobs.add_subparsers(title='jobs subcommands',
-                                description='valid subcommands',
-                                help='additional help')
+        jobs_subparsers = jobs.add_subparsers(title='jobs subcommands')
         # Jobs list
-        jobs_list = jobs_subparsers.add_parser('list')
+        jobs_list = jobs_subparsers.add_parser('list', help="list all jobs")
         jobs_list.set_defaults(func=api.get_jobs)
 
+        # Jobs template
+        jobs_template = jobs_subparsers.add_parser('template', help="download a job template")
+        jobs_template.add_argument('-n', '--name',
+                                   help='job name',
+                                   required=True)
+        jobs_template.add_argument('-t', '--app-type-id',
+                                   help='app type id',
+                                   required=True)
+        jobs_template.set_defaults(func=api.get_job_template)
+
         # Jobs submit
-        jobs_submit = jobs_subparsers.add_parser('submit')
-        jobs_submit.add_argument('-n', '--name',
-                                 help='job name',
+        jobs_submit = jobs_subparsers.add_parser('submit', help="submit a new job")
+        jobs_submit.add_argument('-t', '--template',
+                                 help='template file name',
                                  required=True)
         jobs_submit.set_defaults(func=api.submit_job)
 
