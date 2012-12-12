@@ -11,9 +11,6 @@ class Output():
         print ""
         print "-"*tot
 
-        if len(objs) == 0:
-            print "No objects found"
-
         for obj in objs:
             for field in fields:
                 title = field.keys()[0]
