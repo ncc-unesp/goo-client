@@ -119,6 +119,17 @@ class GooApi():
             if v not in exclude:
                 print "%s=%s" % (v, k)
 
+    def remove_job(self, args):
+        try:
+            job_id = args.job_id
+            result = self.api.jobs(job_id).delete(token=self.token)
+        except Exception as e:
+            print "%s" % e
+            print "Aborting..."
+            sys.exit()
+
+        print "Job %s removed" % job_id
+
     def submit_job(self, args):
         template = args.template
         if not os.path.exists(template):

@@ -51,6 +51,14 @@ class GooCmdLine():
                                  required=True)
         jobs_submit.set_defaults(func=api.submit_job)
 
+        # Job remove
+        jobs_remove = jobs_subparsers.add_parser('remove', help="remove a job")
+        jobs_remove.add_argument('-j', '--job-id',
+                                 help='job id to remove',
+                                 required=True)
+        jobs_remove.set_defaults(func=api.remove_job)
+
+
     def parse_args(self):
         self.args = self.parser.parse_args()
 
