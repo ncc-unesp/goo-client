@@ -82,8 +82,9 @@ class GooApi():
             # Field name and size in cols
             fields = [ {'id': 5},
                        {'name': 30},
-                       {'priority': 15},
-                       {'progress': 15}]
+                       {'status': 7},
+                       {'priority': 10},
+                       {'progress': 10}]
 
             self.output.show(fields, jobs)
         except Exception as e:

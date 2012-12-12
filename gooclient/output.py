@@ -20,3 +20,5 @@ class Output():
                 size = field.values()[0]
                 print str(obj[title]).ljust(size),
             print ""
+
+        print "\n%d objects found" % len(objs)
