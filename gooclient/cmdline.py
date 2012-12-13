@@ -58,6 +58,13 @@ class GooCmdLine():
                                  required=True)
         jobs_remove.set_defaults(func=api.remove_job)
 
+        # Objects
+        objects = subparsers.add_parser('objects', help='objects help')
+        objects_subparsers = objects.add_subparsers(title='objects subcommands')
+        # Objects list
+        objects_list = objects_subparsers.add_parser('list', help="list all objects")
+        objects_list.set_defaults(func=api.get_objects)
+
 
     def parse_args(self):
         self.args = self.parser.parse_args()

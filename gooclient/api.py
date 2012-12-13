@@ -94,6 +94,26 @@ class GooApi():
 
         return jobs
 
+    def get_objects(self, args):
+        try:
+            objects = self.api.objects.get(token=self.token)
+            objects = objects['objects']
+
+            # Field name and size in cols
+            fields = [ {'id': 5},
+                       {'name': 30},
+                       {'size': 7},
+                       {'create_time': 10}]
+
+            self.output.show(fields, objects)
+        except Exception as e:
+            print "%s" % e
+            print "Aborting..."
+            sys.exit()
+
+        return objects
+
+
     def get_app(self, app_id):
         try:
             app = self.api.apps(app_id).get(token=self.token)
