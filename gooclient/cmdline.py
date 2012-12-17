@@ -64,6 +64,25 @@ class GooCmdLine():
         # Objects list
         objects_list = objects_subparsers.add_parser('list', help="list all objects")
         objects_list.set_defaults(func=api.get_objects)
+        # Objects upload
+        objects_upload = objects_subparsers.add_parser('upload', help="upload a object")
+        objects_upload.add_argument('-n', '--name',
+                                    help='object name (string)',
+                                    required=True)
+        objects_upload.add_argument('-o', '--object',
+                                    help='object to upload',
+                                    required=True)
+
+        objects_upload.set_defaults(func=api.upload_object)
+
+
+        # Data Proxy Servers
+        dps = subparsers.add_parser('dps', help='Data Proxy Servers help')
+        dps_subparsers = dps.add_subparsers(title='Data Proxy Servers subcommands')
+        # DPS list
+        dps_list = dps_subparsers.add_parser('list', help="list all availables DPS")
+        dps_list.set_defaults(func=api.show_dataproxy_servers)
+
 
 
     def parse_args(self):

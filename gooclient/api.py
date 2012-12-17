@@ -94,6 +94,35 @@ class GooApi():
 
         return jobs
 
+    def upload_object(self, args):
+        filename = args.object
+        object_name = args.name
+
+        if not os.path.exists(filename):
+            print "Error: Failed to open %s" % filename
+            print "Aborting..."
+            sys.exit()
+
+        servers = self.get_dataproxy_servers()
+        if len(servers) == 0:
+            print "Error: No dataproxy servers found"
+            print "Please contact NCC team"
+            print "Aborting..."
+            sys.exit()
+
+        # TODO: write a better heuristic, now is the first server.
+        server_uri = servers[0]['url']
+
+        object_data = {'name': "%s" % object_name}
+        try:
+            dps_api = slumber.API(server_uri)
+            file = open(filename)
+            dps_api.dataproxy.objects.post(object_data, token=self.token)
+        except Exception as e:
+            print "%s" % e
+            print "Aborting..."
+            sys.exit()
+
     def get_objects(self, args):
         try:
             objects = self.api.objects.get(token=self.token)
@@ -122,6 +151,25 @@ class GooApi():
             print "Aborting..."
             sys.exit()
         return app
+
+    def get_dataproxy_servers(self):
+        try:
+            servers = self.api.dataproxyserver.get(token=self.token)
+            servers = servers['objects']
+
+        except Exception as e:
+            print "%s" % e
+            print "Aborting..."
+            sys.exit()
+        return servers
+
+    def show_dataproxy_servers(self, args):
+        servers = self.get_dataproxy_servers()
+        fields = [ {'id': 5},
+                   {'name': 30},
+                   {'url': 30}]
+
+        self.output.show(fields, servers)
 
     def get_job_template(self, args):
         app_id = args.app_type_id
