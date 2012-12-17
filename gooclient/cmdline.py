@@ -65,7 +65,7 @@ class GooCmdLine():
         objects_list = objects_subparsers.add_parser('list', help="list all objects")
         objects_list.set_defaults(func=api.get_objects)
         # Objects upload
-        objects_upload = objects_subparsers.add_parser('upload', help="upload a object")
+        objects_upload = objects_subparsers.add_parser('upload', help="upload an object")
         objects_upload.add_argument('-n', '--name',
                                     help='object name (string)',
                                     required=True)
@@ -75,6 +75,13 @@ class GooCmdLine():
 
         objects_upload.set_defaults(func=api.upload_object)
 
+
+        # Object delete
+        objects_delete = objects_subparsers.add_parser('delete', help="delete an object")
+        objects_delete.add_argument('-i', '--object-id',
+                                    help='object id',
+                                    required=True)
+        objects_delete.set_defaults(func=api.delete_object)
 
         # Data Proxy Servers
         dps = subparsers.add_parser('dps', help='Data Proxy Servers help')
