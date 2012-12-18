@@ -117,6 +117,32 @@ class GooApi():
 
         print "Object %s delete with success" % object_id
 
+    def download_object(self, args):
+        object_id = args.object_id
+
+        servers = self._get_dataproxy_servers()
+        if len(servers) == 0:
+            print "Error: No dataproxy servers found"
+            print "Please contact NCC team"
+            print "Aborting..."
+            sys.exit()
+
+        # TODO: write a better heuristic, now is the first server.
+        server_uri = servers[0]['url']
+
+        try:
+            dps_api = slumber.API(server_uri)
+            data = dps_api.dataproxy.objects(object_id).get(token=self.token)
+            file = open("object-%s.zip" % object_id, "w+")
+            file.write(data)
+            file.close()
+        except Exception as e:
+            print "%s" % e
+            print "Aborting..."
+            sys.exit()
+
+        print "Finish"
+
     def upload_object(self, args):
         filename = args.object
         object_name = args.name

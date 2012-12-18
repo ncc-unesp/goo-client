@@ -18,6 +18,16 @@ try:
 except ImportError:
     _SERIALIZERS["yaml"] = False
 
+class GooSerializer(slumber.serialize.BaseSerializer):
+    key = "goo"
+    content_type = "aplication/octet-stream"
+
+    def loads(self, data):
+        return data
+
+    def dumps(self, data):
+        return data
+
 
 class BaseSerializer(object):
 

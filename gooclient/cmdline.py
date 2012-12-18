@@ -64,6 +64,13 @@ class GooCmdLine():
         # Objects list
         objects_list = objects_subparsers.add_parser('list', help="list all objects")
         objects_list.set_defaults(func=api.get_objects)
+        # Objects download
+        objects_download = objects_subparsers.add_parser('download', help="download an object")
+        objects_download.add_argument('-i', '--object-id',
+                                    help='object id',
+                                    required=True)
+        objects_download.set_defaults(func=api.download_object)
+
         # Objects upload
         objects_upload = objects_subparsers.add_parser('upload', help="upload an object")
         objects_upload.add_argument('-n', '--name',
