@@ -1,5 +1,3 @@
-from slumber import exceptions
-
 _SERIALIZERS = {
     "json": True,
     "yaml": True,
@@ -18,15 +16,6 @@ try:
 except ImportError:
     _SERIALIZERS["yaml"] = False
 
-class GooSerializer(slumber.serialize.BaseSerializer):
-    key = "goo"
-    content_type = "aplication/octet-stream"
-
-    def loads(self, data):
-        return data
-
-    def dumps(self, data):
-        return data
 
 
 class BaseSerializer(object):
@@ -45,6 +34,15 @@ class BaseSerializer(object):
     def dumps(self, data):
         raise NotImplementedError()
 
+class GooSerializer(BaseSerializer):
+    key = "goo"
+    content_type = "aplication/octet-stream"
+
+    def loads(self, data):
+        return data
+
+    def dumps(self, data):
+        return data
 
 class JsonSerializer(BaseSerializer):
 

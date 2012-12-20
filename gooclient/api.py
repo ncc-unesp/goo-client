@@ -1,4 +1,4 @@
-import gooclient.slumber as slumber
+import slumber
 import requests
 import sys
 import datetime

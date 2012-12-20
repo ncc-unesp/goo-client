@@ -6,6 +6,7 @@ import requests
 from slumber import exceptions
 from slumber.serialize import Serializer
 
+
 __all__ = ["Resource", "API"]
 
 
