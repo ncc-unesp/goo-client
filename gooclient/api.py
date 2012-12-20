@@ -260,7 +260,7 @@ class GooApi():
         cp = ConfigParser.ConfigParser()
         cp.readfp(FakeSecHead(open(template)))
 
-        fields = {'name', 'app_id', 'hosts', 'pph', 'priority', 'restart',
+        fields = {'name', 'app', 'hosts', 'pph', 'priority', 'restart',
                   'executable', 'args', 'inputs', 'outputs', 'checkpoints',
                   'app_obj_id', 'input_obj_id', 'checkpoint_obj_id', 'ttl',
                   'disk_requirement', 'memory_requirement'}
