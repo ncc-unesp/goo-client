@@ -8,9 +8,8 @@ class GooCmdLine():
         self.parser.add_argument('--version',
                             action='version',
                             version='%(prog)s 0.1.0')
-        self.parser.add_argument('-v', '--verbose',
-                            action='count',
-                            help="run in verbose mode")
+        self.parser.add_argument('-d', '--debug',
+                            help="run in debug mode")
 
         subparsers = self.parser.add_subparsers(title='subcommands',
                             description='valid subcommands',

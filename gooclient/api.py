@@ -25,7 +25,7 @@ class GooApi():
 
         self.output = Output()
         self.config = config
-        self.api = slumber.API(self.config.api_uri, format="json")
+        self.api = slumber.API(self.config.api_uri, format="json", debug=self.config.debug)
 
     def slugfy(self, text, separator):
         ret = ""
@@ -44,7 +44,8 @@ class GooApi():
         try:
             url = self.config.api_uri
             api = slumber.API(url, auth=(self.config.username,
-                                         self.config.password))
+                                         self.config.password),
+                                   debug=self.config.debug)
             token = api.auth.post({})
             self.set_token(token['token'])
         except Exception as e:
@@ -108,7 +109,7 @@ class GooApi():
         server_uri = servers[0]['url']
 
         try:
-            dps_api = slumber.API(server_uri)
+            dps_api = slumber.API(server_uri, debug=self.config.debug)
             dps_api.dataproxy.objects(object_id).delete(token=self.token)
         except Exception as e:
             print "%s" % e
@@ -131,7 +132,7 @@ class GooApi():
         server_uri = servers[0]['url']
 
         try:
-            dps_api = slumber.API(server_uri)
+            dps_api = slumber.API(server_uri, debug=self.config.debug)
             data = dps_api.dataproxy.objects(object_id).get(token=self.token)
             file = open("object-%s.zip" % object_id, "w+")
             file.write(data)
@@ -165,7 +166,7 @@ class GooApi():
         object_data = {'name': "%s" % object_name,
                        'file': open(filename)}
         try:
-            dps_api = slumber.API(server_uri)
+            dps_api = slumber.API(server_uri, debug=self.config.debug)
             file = open(filename)
             dps_api.dataproxy.objects.post(object_data, token=self.token)
         except Exception as e:

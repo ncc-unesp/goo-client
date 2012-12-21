@@ -1,5 +1,5 @@
 [global]
 api_uri = http://localhost:8000/api/v1/
-verbose = True
+debug = True
 
 [auth]

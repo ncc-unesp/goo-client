@@ -8,7 +8,7 @@ class GooConfig():
     gooconfig = None
     config = "~/.goorc"
 
-    verbose = False
+    debug = False
     api_uri = None
 
     # Only used when no token is valid
@@ -31,7 +31,7 @@ class GooConfig():
     def load_global(self):
         # Try to read global section
         try:
-            self.verbose = self.gooconfig.get("global", "verbose")
+            self.debug = self.gooconfig.get("global", "debug")
         except:
             pass
 

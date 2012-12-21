@@ -2,7 +2,7 @@ import posixpath
 import urlparse
 
 import requests
-
+import sys
 from slumber import exceptions
 from slumber.serialize import Serializer
 
@@ -93,6 +93,8 @@ class Resource(ResourceAttributesMixin, object):
         s = self._store["serializer"]
         url = self._store["base_url"]
 
+        requests.defaults.defaults["verbose"] = sys.stderr
+
         if self._store["append_slash"] and not url.endswith("/"):
             url = url + "/"
 
@@ -119,7 +121,28 @@ class Resource(ResourceAttributesMixin, object):
         resource_obj = self(url_override=resp.headers["location"])
         return resource_obj.get(params=kwargs)
 
+    def _debug(self, *args, **kwargs):
+        if self._store["debug"] == "True":
+            print "DEBUG ",
+            print kwargs['fmt'] % args
+
     def _try_to_serialize_response(self, resp):
+        # Debug request
+        self._debug(resp.request.method, resp.request.url, fmt=">> %s %s")
+        for k,v in resp.request.headers.items():
+            self._debug(k,v, fmt=">> %s: %s")
+        self._debug(resp.request.data, fmt=">> %s")
+
+        # Debug response
+        status = resp.raw._original_response.status
+        reason = resp.raw._original_response.reason
+        content = resp.content
+        self._debug(status, reason, fmt="<< %s %s")
+        for k,v in resp.headers.items():
+            self._debug(k,v, fmt="<< %s: %s")
+        self._debug(content, fmt="<< %s")
+
+
         s = self._store["serializer"]
 
         if resp.headers.get("content-type", None):
@@ -206,7 +229,7 @@ class Resource(ResourceAttributesMixin, object):
 
 class API(ResourceAttributesMixin, object):
 
-    def __init__(self, base_url=None, auth=None, format=None, append_slash=True, session=None, serializer=None):
+    def __init__(self, base_url=None, auth=None, format=None, append_slash=True, session=None, serializer=None, debug=False):
         if serializer is None:
             s = Serializer(default=format)
 
@@ -216,6 +239,7 @@ class API(ResourceAttributesMixin, object):
             "append_slash": append_slash,
             "session": requests.session(auth=auth) if session is None else session,
             "serializer": s,
+            "debug": debug,
         }
 
         # Do some Checks for Required Values
