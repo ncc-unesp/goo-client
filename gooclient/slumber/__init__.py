@@ -6,7 +6,6 @@ import sys
 from slumber import exceptions
 from slumber.serialize import Serializer
 
-
 __all__ = ["Resource", "API"]
 
 
@@ -106,6 +105,7 @@ class Resource(ResourceAttributesMixin, object):
             headers['content-type'] = s.get_content_type()
 
         resp = self._store["session"].request(method, url, data=data, params=params, files=files, headers=headers)
+        self._debug(resp)
 
         if 400 <= resp.status_code <= 499:
             raise exceptions.HttpClientError("Client Error %s: %s" % (resp.status_code, url), response=resp, content=resp.content)
@@ -114,6 +114,7 @@ class Resource(ResourceAttributesMixin, object):
 
         self._ = resp
 
+
         return resp
 
     def _handle_redirect(self, resp, **kwargs):
@@ -121,27 +122,28 @@ class Resource(ResourceAttributesMixin, object):
         resource_obj = self(url_override=resp.headers["location"])
         return resource_obj.get(params=kwargs)
 
-    def _debug(self, *args, **kwargs):
+    def _print_debug(self, *args, **kwargs):
         if self._store["debug"] == "True":
             print "DEBUG ",
             print kwargs['fmt'] % args
 
-    def _try_to_serialize_response(self, resp):
+    def _debug(self, resp):
         # Debug request
-        self._debug(resp.request.method, resp.request.url, fmt=">> %s %s")
+        self._print_debug(resp.request.method, resp.request.url, fmt=">> %s %s")
         for k,v in resp.request.headers.items():
-            self._debug(k,v, fmt=">> %s: %s")
-        self._debug(resp.request.data, fmt=">> %s")
+            self._print_debug(k,v, fmt=">> %s: %s")
+        self._print_debug(resp.request.data, fmt=">> %s")
 
         # Debug response
         status = resp.raw._original_response.status
         reason = resp.raw._original_response.reason
         content = resp.content
-        self._debug(status, reason, fmt="<< %s %s")
+        self._print_debug(status, reason, fmt="<< %s %s")
         for k,v in resp.headers.items():
-            self._debug(k,v, fmt="<< %s: %s")
-        self._debug(content, fmt="<< %s")
+            self._print_debug(k,v, fmt="<< %s: %s")
+        self._print_debug(content, fmt="<< %s")
 
+    def _try_to_serialize_response(self, resp):
 
         s = self._store["serializer"]
 
