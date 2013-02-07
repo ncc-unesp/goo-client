@@ -1,15 +1,15 @@
 import os
 import sys
-from gooclient.api import GooApi
+from gooclient.client import GooClient
 from gooclient.config import GooConfig
 from gooclient.cmdline import GooCmdLine
 
 def main():
 
     config = GooConfig()
-    api = GooApi(config)
+    client = GooClient(config)
     # Parse cmd line
-    cmd = GooCmdLine(api)
+    cmd = GooCmdLine(client)
 
     cmd.parse_args()
 
@@ -19,7 +19,7 @@ def main():
     if token is None:
         config.username, config.password = config.get_credentials()
 
-        token = api.request_token()
+        token = client.request_token()
         if token is None:
             print "Error: Could not get token."
             print "Aborting..."
@@ -27,6 +27,6 @@ def main():
 
         config.save_token(token=token)
 
-    api.set_token(token)
+    client.set_token(token)
 
     cmd.execute()

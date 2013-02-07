@@ -1,4 +1,4 @@
-import slumber
+from gooclient.api.goo import GooAPI
 import requests
 import sys
 import datetime
@@ -18,14 +18,14 @@ class FakeSecHead(object):
             finally: self.sechead = None
         else: return self.fp.readline()
 
-class GooApi():
+class GooClient():
     def __init__(self, config=None):
         if config is None:
             return None
 
         self.output = Output()
         self.config = config
-        self.api = slumber.API(self.config.api_uri, format="json", debug=self.config.debug)
+        self.api = GooAPI(self.config.api_uri, format="json", debug=self.config.debug)
 
     def slugfy(self, text, separator):
         ret = ""
@@ -43,9 +43,9 @@ class GooApi():
     def request_token(self):
         try:
             url = self.config.api_uri
-            api = slumber.API(url, auth=(self.config.username,
-                                         self.config.password),
-                                   debug=self.config.debug)
+            api = GooAPI(url, auth=(self.config.username,
+                                    self.config.password),
+                         debug=self.config.debug)
             token = api.auth.post({})
             self.set_token(token['token'])
         except Exception as e:
@@ -109,7 +109,7 @@ class GooApi():
         server_uri = servers[0]['url']
 
         try:
-            dps_api = slumber.API(server_uri, debug=self.config.debug)
+            dps_api = GooAPI(server_uri, debug=self.config.debug)
             dps_api.dataproxy.objects(object_id).delete(token=self.token)
         except Exception as e:
             print "%s" % e
@@ -130,11 +130,10 @@ class GooApi():
 
         # TODO: write a better heuristic, now is the first server.
         server_uri = servers[0]['url']
-
         try:
-            dps_api = slumber.API(server_uri, debug=self.config.debug)
+            dps_api = GooAPI(server_uri, debug=self.config.debug)
             data = dps_api.dataproxy.objects(object_id).get(token=self.token)
-            file = open("object-%s.zip" % object_id, "w+")
+            FILE = OPen("object-%s.zip" % object_id, "w+")
             file.write(data)
             file.close()
         except Exception as e:
@@ -162,17 +161,18 @@ class GooApi():
 
         # TODO: write a better heuristic, now is the first server.
         server_uri = servers[0]['url']
-
-        object_data = {'name': "%s" % object_name,
-                       'file': open(filename)}
         try:
-            dps_api = slumber.API(server_uri, debug=self.config.debug)
-            file = open(filename)
-            dps_api.dataproxy.objects.post(object_data, token=self.token)
+            f = open(filename, 'r')
+            object_data = {'name': "%s" % object_name,
+                           'file': f}
+            dps_api = GooAPI(server_uri, debug=self.config.debug)
+            result = dps_api.dataproxy.objects.post(object_data, token=self.token)
         except Exception as e:
             print "%s" % e
             print "Aborting..."
             sys.exit()
+        finally:
+            f.close()
 
         print "%s uploaded with success" % filename
 
