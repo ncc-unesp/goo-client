@@ -262,7 +262,7 @@ class GooClient():
 
         fields = {'name', 'app', 'hosts', 'pph', 'priority', 'restart',
                   'executable', 'args', 'inputs', 'outputs', 'checkpoints',
-                  'app_obj_id', 'input_obj_id', 'checkpoint_obj_id', 'ttl',
+                  'app_objs', 'input_objs', 'checkpoint_objs', 'ttl',
                   'disk_requirement', 'memory_requirement'}
 
         values = {}
@@ -276,7 +276,7 @@ class GooClient():
                     break
                     sys.exit()
 
-                values[field] = value
+                values[field] = eval(value)
             except:
                 pass
 
