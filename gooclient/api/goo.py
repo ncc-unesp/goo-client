@@ -6,6 +6,7 @@ import urllib2
 import urllib
 import urlparse
 import posixpath
+import pprint
 from gooclient.api.exceptions import *
 from gooclient.api.serialize import Serializer
 
@@ -73,6 +74,17 @@ class Resource(ResourceCommon, object):
             print "DEBUG ",
             print kwargs['fmt'] % args
 
+    def _extract_files(self, d):
+        """
+        Remove file-like objects from d and return them in a dictionary.
+        """
+        files = {}
+        for k in d.keys():
+            if callable(getattr(d[k], 'read', None)):
+                files[k] = d[k]
+                del d[k]
+        return files
+
     def _debug(self, response, request):
         # Debug request
         self._print_debug(request._method,
@@ -92,6 +104,7 @@ class Resource(ResourceCommon, object):
 
     def _request(self, method, data=None, params=None, files=None):
         url = self._store["base_url"]
+        s = self._store["serializer"]
 
         if self._store["append_slash"] and not url.endswith("/"):
             url += "/"
@@ -99,16 +112,20 @@ class Resource(ResourceCommon, object):
         if params:
             url += '?' + urllib.urlencode(params)
 
-        request = RequestWithMethod(method = method, url = url)
+        request = RequestWithMethod(method = method, data=data, url = url)
+        request.add_header('Content-Type',  s.get_content_type())
         try:
             response = urllib2.urlopen(request)
+            self._debug(response, request)
         except urllib2.HTTPError as e:
+            pp = pprint.PrettyPrinter(indent=4, depth=6)
+            pp.pprint(e.headers.__dict__)
+            pp.pprint(e.read())
             raise HttpClientError("Client Error %s: %s" % (e.code, e.url), content=e.msg)
         except urllib2.URLError as e:
             raise HttpServerError("Server Error %s" % (e.reason))
         else:
 
-            self._debug(response, request)
 
             self._ = response
             return response
@@ -135,6 +152,58 @@ class Resource(ResourceCommon, object):
             return self._try_to_serialize_response(response)
 
         return None
+
+    def post(self, data, **kwargs):
+        s = self._store["serializer"]
+
+        files = self._extract_files(data)
+        # Files require data to be in a dictionary, not string
+        if not files:
+            data = s.dumps(data)
+        resp = self._request("POST", data=data, params=kwargs, files=files)
+
+        #resp = self._request("POST", data=s.dumps(data), params=kwargs)
+        if 200 <= resp.code <= 299:
+            return self._try_to_serialize_response(resp)
+        else:
+            # @@@ Need to be Some sort of Error Here or Something
+            return
+
+    def patch(self, data, **kwargs):
+        s = self._store["serializer"]
+
+#        resp = self._request("PATCH", data=s.dumps(data), params=kwargs)
+        files = self._extract_files(data)
+        # Files require data to be in a dictionary, not string
+        if not files:
+            data = s.dumps(data)
+        resp = self._request("PUT", data=data, params=kwargs, files=files)
+
+        if 200 <= resp.code <= 299:
+            return self._try_to_serialize_response(resp)
+        else:
+            # @@@ Need to be Some sort of Error Here or Something
+            return
+
+    def put(self, data, **kwargs):
+        s = self._store["serializer"]
+
+        resp = self._request("PUT", data=s.dumps(data), params=kwargs)
+        if 200 <= resp.code <= 299:
+            return self._try_to_serialize_response(resp)
+        else:
+            return False
+
+    def delete(self, **kwargs):
+        resp = self._request("DELETE", params=kwargs)
+        if 200 <= resp.code <= 299:
+            if resp.code == 204:
+                return True
+            else:
+                return True  # @@@ Should this really be True?
+        else:
+            return False
+
 
 
 class GooAPI(ResourceCommon, object):
