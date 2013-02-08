@@ -171,7 +171,6 @@ class Resource(ResourceCommon, object):
         # Files require data to be in a dictionary, not string
         if not files:
             data = s.dumps(data)
-        print data
         resp = self._request("POST", data=data, params=kwargs, files=files)
 
         #resp = self._request("POST", data=s.dumps(data), params=kwargs)
