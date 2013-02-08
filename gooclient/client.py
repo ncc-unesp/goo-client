@@ -8,6 +8,8 @@ import ConfigParser
 import json
 from gooclient.output import Output
 
+CURRENT_API_VERSION = "v1"
+
 class FakeSecHead(object):
     def __init__(self, fp):
         self.fp = fp
@@ -160,19 +162,15 @@ class GooClient():
             sys.exit()
 
         # TODO: write a better heuristic, now is the first server.
-        server_uri = servers[0]['url']
-        try:
-            f = open(filename, 'r')
-            object_data = {'name': "%s" % object_name,
-                           'file': f}
-            dps_api = GooAPI(server_uri, debug=self.config.debug)
-            result = dps_api.dataproxy.objects.post(object_data, token=self.token)
-        except Exception as e:
-            print "%s" % e
-            print "Aborting..."
-            sys.exit()
-        finally:
-            f.close()
+        server_url = servers[0]['url']
+        f = open(filename, 'r')
+        object_data = {'name': "%s" % object_name,
+                       'file': f}
+        server_uri = "%sapi/%s/" % (server_url, CURRENT_API_VERSION)
+
+        dps_api = GooAPI(server_uri, debug=self.config.debug)
+        result = dps_api.dataproxy.objects.post(data=object_data, token=self.token)
+        f.close()
 
         print "%s uploaded with success" % filename
 

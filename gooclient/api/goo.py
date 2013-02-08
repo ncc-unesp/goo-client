@@ -4,6 +4,7 @@
 
 import urllib2
 import base64
+import mmap
 import urllib
 import urlparse
 import posixpath
@@ -106,6 +107,7 @@ class Resource(ResourceCommon, object):
     def _request(self, method, data=None, params=None, files=None):
         url = self._store["base_url"]
         s = self._store["serializer"]
+        auth = self._store["auth"]
 
         if self._store["append_slash"] and not url.endswith("/"):
             url += "/"
@@ -116,14 +118,20 @@ class Resource(ResourceCommon, object):
         headers = {
             'accept': s.get_content_type()
         }
+        mmaped = None
+        if files:
+            mmaped = mmap.mmap(files['file'].fileno(), 0, access=mmap.ACCESS_READ)
+            data = mmaped
 
-        request = RequestWithMethod(method = method, data=data, url = url, headers=headers)
-        request.add_header('Content-Type',  s.get_content_type())
-        print s.get_content_type()
+        request = RequestWithMethod(method = method, data = data, url = url, headers=headers)
 
-        auth = self._store["auth"]
+        if not files:
+            # files imply a content-type of multipart/form-data
+            request.add_header('Content-Type',  s.get_content_type())
+
         if auth:
             request.add_header("Authorization", "Basic %s" % self._store["auth"].replace("\n",""))
+
 
         try:
             response = urllib2.urlopen(request)
@@ -137,7 +145,8 @@ class Resource(ResourceCommon, object):
             raise HttpServerError("Server Error %s" % (e.reason))
         else:
 
-
+            if mmaped:
+                mmaped.close()
             self._ = response
             return response
 
@@ -162,23 +171,25 @@ class Resource(ResourceCommon, object):
         if 200 <= response.code <= 299:
             return self._try_to_serialize_response(response)
 
-        return None
+        return
 
     def post(self, data, **kwargs):
         s = self._store["serializer"]
 
         files = self._extract_files(data)
+
         # Files require data to be in a dictionary, not string
         if not files:
             data = s.dumps(data)
+
         resp = self._request("POST", data=data, params=kwargs, files=files)
 
+        print resp
         #resp = self._request("POST", data=s.dumps(data), params=kwargs)
         if 200 <= resp.code <= 299:
             return self._try_to_serialize_response(resp)
-        else:
-            # @@@ Need to be Some sort of Error Here or Something
-            return
+        # @@@ Need to be Some sort of Error Here or Something
+        return
 
     def patch(self, data, **kwargs):
         s = self._store["serializer"]
@@ -192,9 +203,8 @@ class Resource(ResourceCommon, object):
 
         if 200 <= resp.code <= 299:
             return self._try_to_serialize_response(resp)
-        else:
-            # @@@ Need to be Some sort of Error Here or Something
-            return
+        # @@@ Need to be Some sort of Error Here or Something
+        return
 
     def put(self, data, **kwargs):
         s = self._store["serializer"]
@@ -221,8 +231,6 @@ class GooAPI(ResourceCommon, object):
     def __init__(self, base_url=None, auth=None, format=None, append_slash=True, serializer=None, session=None, debug=False):
         if serializer is None:
             s = Serializer(default=format)
-
-
 
         self._store = {
             "base_url": base_url,
