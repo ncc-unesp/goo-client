@@ -3,6 +3,7 @@
 # Now we are using pure urllib2.
 
 import urllib2
+import base64
 import urllib
 import urlparse
 import posixpath
@@ -112,8 +113,18 @@ class Resource(ResourceCommon, object):
         if params:
             url += '?' + urllib.urlencode(params)
 
-        request = RequestWithMethod(method = method, data=data, url = url)
+        headers = {
+            'accept': s.get_content_type()
+        }
+
+        request = RequestWithMethod(method = method, data=data, url = url, headers=headers)
         request.add_header('Content-Type',  s.get_content_type())
+        print s.get_content_type()
+
+        auth = self._store["auth"]
+        if auth:
+            request.add_header("Authorization", "Basic %s" % self._store["auth"].replace("\n",""))
+
         try:
             response = urllib2.urlopen(request)
             self._debug(response, request)
@@ -160,6 +171,7 @@ class Resource(ResourceCommon, object):
         # Files require data to be in a dictionary, not string
         if not files:
             data = s.dumps(data)
+        print data
         resp = self._request("POST", data=data, params=kwargs, files=files)
 
         #resp = self._request("POST", data=s.dumps(data), params=kwargs)
@@ -211,11 +223,14 @@ class GooAPI(ResourceCommon, object):
         if serializer is None:
             s = Serializer(default=format)
 
+
+
         self._store = {
             "base_url": base_url,
             "format": format if format is not None else "json",
             "append_slash": append_slash,
             "debug": debug,
+            "auth": base64.encodestring('%s:%s' % (auth[0], auth[1])) if auth is not None else None,
             "serializer": s,
         }
 

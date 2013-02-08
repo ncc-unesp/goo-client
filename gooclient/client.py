@@ -276,7 +276,11 @@ class GooClient():
                     break
                     sys.exit()
 
-                values[field] = eval(value)
+                if field in ('app_objs', 'input_objs', 'checkpoint_objs'):
+                    values[field] = value.split(",")
+                else:
+                    values[field] = value
+
             except:
                 pass
 
