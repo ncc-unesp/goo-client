@@ -1,4 +1,5 @@
 from gooclientlib.api import API
+from gooclientlib.exceptions import HttpClientError, HttpServerError
 import requests
 import sys
 import datetime
@@ -9,6 +10,18 @@ import json
 from output import Output
 
 CURRENT_API_VERSION = "v1"
+
+def translate_gooapi_to_gooclient_exception(f):
+    def _f(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except HttpClientError as e:
+            print e.code, e.content
+            sys.exit()
+        except HttpServerError as e:
+            print e.content
+            sys.exit()
+    return _f
 
 class FakeSecHead(object):
     def __init__(self, fp):
@@ -42,61 +55,49 @@ class GooClient():
 
         return ret.strip()
 
+    @translate_gooapi_to_gooclient_exception
     def request_token(self):
-        try:
-            url = self.config.api_uri
-            api = API(url, auth=(self.config.username,
-                                    self.config.password),
-                         debug=self.config.debug)
-            token = api.auth.post({})
-            self.set_token(token['token'])
-        except Exception as e:
-            print "%s" % e
-            print "Aborting..."
-            sys.exit()
+        url = self.config.api_uri
+        api = API(url, auth=(self.config.username,
+                                self.config.password),
+                     debug=self.config.debug)
+        token = api.auth.post({})
+        self.set_token(token['token'])
         return token['token']
 
     def set_token(self, token):
         self.token = token
 
+    @translate_gooapi_to_gooclient_exception
     def get_apps(self, args):
-        try:
-            apps = self.api.apps.get(token=self.token)
-            apps = apps['objects']
+        apps = self.api.apps.get(token=self.token)
+        apps = apps['objects']
 
-            # Field name and size in cols
-            fields = [ {'id': 5},
-                       {'name': 30},
-                       {'multi_hosts': 15},
-                       {'multi_thread': 15}]
+        # Field name and size in cols
+        fields = [ {'id': 5},
+                   {'name': 30},
+                   {'multi_hosts': 15},
+                   {'multi_thread': 15}]
 
-            self.output.show(fields, apps)
-        except Exception as e:
-            print "%s" % e
-            print "Aborting..."
-            sys.exit()
+        self.output.show(fields, apps)
         return apps
 
+    @translate_gooapi_to_gooclient_exception
     def get_jobs(self, args):
-        try:
-            jobs = self.api.jobs.get(token=self.token)
-            jobs = jobs['objects']
+        jobs = self.api.jobs.get(token=self.token)
+        jobs = jobs['objects']
 
-            # Field name and size in cols
-            fields = [ {'id': 5},
-                       {'name': 30},
-                       {'status': 7},
-                       {'priority': 10},
-                       {'progress': 10}]
+        # Field name and size in cols
+        fields = [ {'id': 5},
+                   {'name': 30},
+                   {'status': 7},
+                   {'priority': 10},
+                   {'progress': 10}]
 
-            self.output.show(fields, jobs)
-        except Exception as e:
-            print "%s" % e
-            print "Aborting..."
-            sys.exit()
-
+        self.output.show(fields, jobs)
         return jobs
 
+    @translate_gooapi_to_gooclient_exception
     def delete_object(self, args):
         object_id = args.object_id
 
@@ -110,16 +111,12 @@ class GooClient():
         # TODO: write a better heuristic, now is the first server.
         server_uri = servers[0]['url']
 
-        try:
-            dps_api = API(server_uri, debug=self.config.debug)
-            dps_api.dataproxy.objects(object_id).delete(token=self.token)
-        except Exception as e:
-            print "%s" % e
-            print "Aborting..."
-            sys.exit()
+        dps_api = API(server_uri, debug=self.config.debug)
+        dps_api.dataproxy.objects(object_id).delete(token=self.token)
 
         print "Object %s delete with success" % object_id
 
+    @translate_gooapi_to_gooclient_exception
     def download_object(self, args):
         object_id = args.object_id
 
@@ -131,20 +128,17 @@ class GooClient():
             sys.exit()
 
         # TODO: write a better heuristic, now is the first server.
-        server_uri = servers[0]['url']
-        try:
-            dps_api = API(server_uri, debug=self.config.debug)
-            data = dps_api.dataproxy.objects(object_id).get(token=self.token)
-            FILE = OPen("object-%s.zip" % object_id, "w+")
-            file.write(data)
-            file.close()
-        except Exception as e:
-            print "%s" % e
-            print "Aborting..."
-            sys.exit()
+        server_url = servers[0]['url']
+        server_uri = "%sapi/%s/" % (server_url, CURRENT_API_VERSION)
+        dps_api = API(server_uri, debug=self.config.debug)
+        data = dps_api.dataproxy.objects(object_id).get(token=self.token)
+        f = open("object-%s.zip" % object_id, "w+")
+        f.write(data)
+        f.close()
 
         print "Finish"
 
+    @translate_gooapi_to_gooclient_exception
     def upload_object(self, args):
         filename = args.object
         object_name = args.name
@@ -174,44 +168,25 @@ class GooClient():
 
         print "%s uploaded with success" % filename
 
+    @translate_gooapi_to_gooclient_exception
     def get_objects(self, args):
-        try:
-            objects = self.api.objects.get(token=self.token)
-            objects = objects['objects']
+        objects = self.api.objects.get(token=self.token)
+        objects = objects['objects']
 
-            # Field name and size in cols
-            fields = [ {'id': 5},
-                       {'name': 30},
-                       {'size': 7},
-                       {'create_time': 10}]
+        # Field name and size in cols
+        fields = [ {'id': 5},
+                   {'name': 30},
+                   {'size': 7},
+                   {'create_time': 10}]
 
-            self.output.show(fields, objects)
-        except Exception as e:
-            print "%s" % e
-            print "Aborting..."
-            sys.exit()
-
+        self.output.show(fields, objects)
         return objects
 
 
-    def get_app(self, app_id):
-        try:
-            app = self.api.apps(app_id).get(token=self.token)
-        except Exception as e:
-            print "%s" % e
-            print "Aborting..."
-            sys.exit()
-        return app
-
+    @translate_gooapi_to_gooclient_exception
     def _get_dataproxy_servers(self):
-        try:
-            servers = self.api.dataproxyserver.get(token=self.token)
-            servers = servers['objects']
-
-        except Exception as e:
-            print "%s" % e
-            print "Aborting..."
-            sys.exit()
+        servers = self.api.dataproxyserver.get(token=self.token)
+        servers = servers['objects']
         return servers
 
     def show_dataproxy_servers(self, args):
@@ -222,11 +197,12 @@ class GooClient():
 
         self.output.show(fields, servers)
 
+    @translate_gooapi_to_gooclient_exception
     def get_job_template(self, args):
         app_id = args.app_type_id
         name = args.name
         slug = self.slugfy(name,"-")
-        app = self.get_app(app_id)
+        app = self.api.apps(app_id).get(token=self.token)
 
         exclude = {'id', 'executable', 'name', 'resource_uri'}
         print "# Goo template file"
@@ -238,17 +214,14 @@ class GooClient():
             if v not in exclude:
                 print "%s=%s" % (v, k)
 
+    @translate_gooapi_to_gooclient_exception
     def remove_job(self, args):
-        try:
-            job_id = args.job_id
-            result = self.api.jobs(job_id).delete(token=self.token)
-        except Exception as e:
-            print "%s" % e
-            print "Aborting..."
-            sys.exit()
+        job_id = args.job_id
+        result = self.api.jobs(job_id).delete(token=self.token)
 
         print "Job %s removed" % job_id
 
+    @translate_gooapi_to_gooclient_exception
     def submit_job(self, args):
         template = args.template
         if not os.path.exists(template):
