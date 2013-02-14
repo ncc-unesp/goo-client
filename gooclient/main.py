@@ -1,11 +1,10 @@
 import os
 import sys
-from gooclient.client import GooClient
-from gooclient.config import GooConfig
-from gooclient.cmdline import GooCmdLine
+from client import GooClient
+from config import GooConfig
+from cmdline import GooCmdLine
 
 def main():
-
     config = GooConfig()
     client = GooClient(config)
     # Parse cmd line

@@ -1,4 +1,4 @@
-from gooclient.api.goo import GooAPI
+from gooclientlib.api import API
 import requests
 import sys
 import datetime
@@ -6,7 +6,7 @@ import htmlentitydefs, re
 import os
 import ConfigParser
 import json
-from gooclient.output import Output
+from output import Output
 
 CURRENT_API_VERSION = "v1"
 
@@ -27,7 +27,7 @@ class GooClient():
 
         self.output = Output()
         self.config = config
-        self.api = GooAPI(self.config.api_uri, format="json", debug=self.config.debug)
+        self.api = API(self.config.api_uri, format="json", debug=self.config.debug)
 
     def slugfy(self, text, separator):
         ret = ""
@@ -45,7 +45,7 @@ class GooClient():
     def request_token(self):
         try:
             url = self.config.api_uri
-            api = GooAPI(url, auth=(self.config.username,
+            api = API(url, auth=(self.config.username,
                                     self.config.password),
                          debug=self.config.debug)
             token = api.auth.post({})
@@ -111,7 +111,7 @@ class GooClient():
         server_uri = servers[0]['url']
 
         try:
-            dps_api = GooAPI(server_uri, debug=self.config.debug)
+            dps_api = API(server_uri, debug=self.config.debug)
             dps_api.dataproxy.objects(object_id).delete(token=self.token)
         except Exception as e:
             print "%s" % e
@@ -133,7 +133,7 @@ class GooClient():
         # TODO: write a better heuristic, now is the first server.
         server_uri = servers[0]['url']
         try:
-            dps_api = GooAPI(server_uri, debug=self.config.debug)
+            dps_api = API(server_uri, debug=self.config.debug)
             data = dps_api.dataproxy.objects(object_id).get(token=self.token)
             FILE = OPen("object-%s.zip" % object_id, "w+")
             file.write(data)
@@ -168,7 +168,7 @@ class GooClient():
                        'file': f}
         server_uri = "%sapi/%s/" % (server_url, CURRENT_API_VERSION)
 
-        dps_api = GooAPI(server_uri, debug=self.config.debug)
+        dps_api = API(server_uri, debug=self.config.debug)
         result = dps_api.dataproxy.objects.post(data=object_data, token=self.token)
         f.close()
 
