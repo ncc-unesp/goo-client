@@ -3,6 +3,7 @@ from gooclientlib.exceptions import HttpClientError, HttpServerError
 import requests
 import sys
 import datetime
+import zipfile
 import htmlentitydefs, re
 import os
 import ConfigParser
@@ -148,6 +149,16 @@ class GooClient():
             print "Aborting..."
             sys.exit()
 
+#        # TODO: Zip problem with utf-8 encoding on upload
+#        # Try to zip
+#        print "Zipping %s.. " % filename,
+#        zf = zipfile.ZipFile('%s.zip' % filename, mode='w')
+#        try:
+#            zf.write(filename)
+#        finally:
+#            zf.close()
+#        print "done."
+
         servers = self._get_dataproxy_servers()
         if len(servers) == 0:
             print "Error: No dataproxy servers found"
@@ -157,7 +168,7 @@ class GooClient():
 
         # TODO: write a better heuristic, now is the first server.
         server_url = servers[0]['url']
-        f = open(filename, 'r')
+        f = open("%s" % filename, 'rb')
         object_data = {'name': "%s" % object_name,
                        'file': f}
         server_uri = "%sapi/%s/" % (server_url, CURRENT_API_VERSION)
