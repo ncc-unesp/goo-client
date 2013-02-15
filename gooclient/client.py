@@ -110,7 +110,8 @@ class GooClient():
             sys.exit()
 
         # TODO: write a better heuristic, now is the first server.
-        server_uri = servers[0]['url']
+        server_url = servers[0]['url']
+        server_uri = "%sapi/%s/" % (server_url, CURRENT_API_VERSION)
 
         dps_api = API(server_uri, debug=self.config.debug)
         dps_api.dataproxy.objects(object_id).delete(token=self.token)
