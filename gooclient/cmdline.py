@@ -72,15 +72,20 @@ class GooCmdLine():
 
         # Objects upload
         objects_upload = objects_subparsers.add_parser('upload', help="upload an object")
-        objects_upload.add_argument('-n', '--name',
-                                    help='object name (string)',
-                                    required=True)
         objects_upload.add_argument('-o', '--object',
                                     help='object to upload',
                                     required=True)
-
         objects_upload.set_defaults(func=api.upload_object)
 
+        # Objects Create
+        objects_create = objects_subparsers.add_parser('create', help="create a object and upload")
+        objects_create.add_argument('-n', '--name',
+                                    help='name of object to create',
+                                    required=True)
+        objects_create.add_argument('-i', '--inputs', nargs="+",
+                                    help='files to pack into object and upload',
+                                    required=True)
+        objects_create.set_defaults(func=api.create_object)
 
         # Object delete
         objects_delete = objects_subparsers.add_parser('delete', help="delete an object")

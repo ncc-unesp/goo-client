@@ -1,5 +1,6 @@
 from gooclientlib.api import API
 from gooclientlib.exceptions import HttpClientError, HttpServerError
+import tempfile
 import requests
 import sys
 import datetime
@@ -43,7 +44,7 @@ class GooClient():
         self.config = config
         self.api = API(self.config.api_uri, format="json", debug=self.config.debug)
 
-    def slugfy(self, text, separator):
+    def _slugfy(self, text, separator='-'):
         ret = ""
         for c in text.lower():
             try:
@@ -143,21 +144,12 @@ class GooClient():
     @translate_gooapi_to_gooclient_exception
     def upload_object(self, args):
         filename = args.object
-        object_name = args.name
+        object_name = os.path.basename(filename)
 
         if not os.path.exists(filename):
             print "Error: Failed to open %s" % filename
             print "Aborting..."
             sys.exit()
-
-        # Try to zip
-        print "Zipping %s.. " % filename,
-        zf = zipfile.ZipFile('%s.zip' % filename, mode='w')
-        try:
-            zf.write(filename)
-        finally:
-            zf.close()
-        print "done."
 
         servers = self._get_dataproxy_servers()
         if len(servers) == 0:
@@ -168,7 +160,7 @@ class GooClient():
 
         # TODO: write a better heuristic, now is the first server.
         server_url = servers[0]['url']
-        f = open("%s.zip" % filename, 'rb')
+        f = open(filename, 'rb')
         object_data = {'name': "%s" % object_name,
                        'file': f}
         server_uri = "%sapi/%s/" % (server_url, CURRENT_API_VERSION)
@@ -178,6 +170,28 @@ class GooClient():
         f.close()
 
         print "%s uploaded with success" % filename
+
+    @translate_gooapi_to_gooclient_exception
+    def create_object(self, args):
+        inputs = args.inputs
+        object_name = "%s.zip" % args.name
+
+        fd, filepath = tempfile.mkstemp('.zip', self._slugfy(args.name))
+
+        # Create package
+        print 'Creating object package...'
+        for f in inputs:
+            zf = zipfile.ZipFile(filepath, mode='a')
+            try:
+                print '  adding %s' % f
+                zf.write(f)
+            finally:
+                zf.close()
+
+        # Force tempfile to be removed
+        fd = open(filepath, 'r')
+        fd.close()
+        pass
 
     @translate_gooapi_to_gooclient_exception
     def get_objects(self, args):
@@ -212,7 +226,7 @@ class GooClient():
     def get_job_template(self, args):
         app_id = args.app_type_id
         name = args.name
-        slug = self.slugfy(name,"-")
+        slug = self._slugfy(name,"-")
         app = self.api.apps(app_id).get(token=self.token)
 
         exclude = {'id', 'executable', 'name', 'resource_uri'}
