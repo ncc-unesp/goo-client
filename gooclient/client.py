@@ -58,6 +58,22 @@ class GooClient():
         return ret.strip()
 
     @translate_gooapi_to_gooclient_exception
+    def _get_data_proxy(self):
+        servers = self._get_dataproxy_servers()
+        if len(servers) == 0:
+            print "Error: No dataproxy servers found"
+            print "Please contact NCC team"
+            print "Aborting..."
+            sys.exit()
+
+        # TODO: write a better heuristic, now is the first server.
+        server_url = servers[0]['url']
+        server_uri = "%sapi/%s/" % (server_url, CURRENT_API_VERSION)
+        return server_uri
+
+
+
+    @translate_gooapi_to_gooclient_exception
     def request_token(self):
         url = self.config.api_uri
         api = API(url, auth=(self.config.username,
@@ -103,16 +119,7 @@ class GooClient():
     def delete_object(self, args):
         object_id = args.object_id
 
-        servers = self._get_dataproxy_servers()
-        if len(servers) == 0:
-            print "Error: No dataproxy servers found"
-            print "Please contact NCC team"
-            print "Aborting..."
-            sys.exit()
-
-        # TODO: write a better heuristic, now is the first server.
-        server_url = servers[0]['url']
-        server_uri = "%sapi/%s/" % (server_url, CURRENT_API_VERSION)
+        server_uri = self._get_data_proxy()
 
         dps_api = API(server_uri, debug=self.config.debug)
         dps_api.dataproxy.objects(object_id).delete(token=self.token)
@@ -123,19 +130,12 @@ class GooClient():
     def download_object(self, args):
         object_id = args.object_id
 
-        servers = self._get_dataproxy_servers()
-        if len(servers) == 0:
-            print "Error: No dataproxy servers found"
-            print "Please contact NCC team"
-            print "Aborting..."
-            sys.exit()
-
-        # TODO: write a better heuristic, now is the first server.
-        server_url = servers[0]['url']
-        server_uri = "%sapi/%s/" % (server_url, CURRENT_API_VERSION)
+        # Get object info
+        obj = self.api.objects(object_id).get(token=self.token)
+        server_uri = self._get_data_proxy()
         dps_api = API(server_uri, debug=self.config.debug)
         data = dps_api.dataproxy.objects(object_id).get(token=self.token)
-        f = open("object-%s.zip" % object_id, "w+")
+        f = open(obj['name'], "w+")
         f.write(data)
         f.close()
 
@@ -151,19 +151,11 @@ class GooClient():
             print "Aborting..."
             sys.exit()
 
-        servers = self._get_dataproxy_servers()
-        if len(servers) == 0:
-            print "Error: No dataproxy servers found"
-            print "Please contact NCC team"
-            print "Aborting..."
-            sys.exit()
+        server_uri = self._get_data_proxy()
 
-        # TODO: write a better heuristic, now is the first server.
-        server_url = servers[0]['url']
         f = open(filename, 'rb')
-        object_data = {'name': "%s" % object_name,
+        object_data = {'name': object_name,
                        'file': f}
-        server_uri = "%sapi/%s/" % (server_url, CURRENT_API_VERSION)
 
         dps_api = API(server_uri, debug=self.config.debug)
         result = dps_api.dataproxy.objects.post(data=object_data, token=self.token)
@@ -188,9 +180,19 @@ class GooClient():
             finally:
                 zf.close()
 
+        server_uri = self._get_data_proxy()
+        f = open(filepath, 'rb')
+        object_data = {'name': object_name,
+                       'file': f}
+
+        dps_api = API(server_uri, debug=self.config.debug)
+        result = dps_api.dataproxy.objects.post(data=object_data, token=self.token)
+        f.close()
+
+        print "%s uploaded with success" % object_name
+
         # Force tempfile to be removed
-        fd = open(filepath, 'r')
-        fd.close()
+        os.unlink(filepath)
         pass
 
     @translate_gooapi_to_gooclient_exception
