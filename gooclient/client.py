@@ -242,6 +242,23 @@ class GooClient():
                 print "%s=%s" % (v, k)
 
     @translate_gooapi_to_gooclient_exception
+    def show_job(self, args):
+        job_id = args.job_id
+        result = self.api.jobs(job_id).get(token=self.token)
+        fields = ('id', 'name', 'app_name', 'priority', 'status', 'progress',
+                  'restart', 'ttl', 'create_time', 'modification_time')
+
+        width = 52
+
+        print "-" * width
+        print "Job Detail".center(width)
+        print "-" * width
+        for f in fields:
+            print "%20s: %s" % (f, result[f])
+        print "-" * width
+
+
+    @translate_gooapi_to_gooclient_exception
     def remove_job(self, args):
         job_id = args.job_id
         result = self.api.jobs(job_id).delete(token=self.token)
