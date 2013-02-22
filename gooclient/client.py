@@ -1,7 +1,9 @@
 from gooclientlib.api import API
 from gooclientlib.exceptions import HttpClientError, HttpServerError
 import tempfile
+import argparse
 import requests
+import glob
 import sys
 import datetime
 import zipfile
@@ -193,7 +195,7 @@ class GooClient():
 
         # Force tempfile to be removed
         os.unlink(filepath)
-        pass
+        return result['resource_uri']
 
     @translate_gooapi_to_gooclient_exception
     def get_objects(self, args):
@@ -292,12 +294,21 @@ class GooClient():
                     sys.exit()
 
                 if field in ('app_objs', 'input_objs', 'checkpoint_objs'):
-                    values[field] = value.split(",")
+                    values[field] = value.split(" ")
+                elif field is 'inputs':
+                    inputs = value.split(" ")
                 else:
                     values[field] = value
-
             except:
                 pass
+
+        if inputs:
+            obj_name = self._slugfy("%s-inputs" % values['name'])
+            input_files = []
+            for i in inputs:
+                input_files.extend(glob.glob(i))
+            args = argparse.Namespace(name=obj_name, inputs=input_files)
+            values['input_objs'] = [self.create_object(args)]
 
         job = self.api.jobs.post(values, token=self.token)
         print "Job %s sent to queue" % job['id']
