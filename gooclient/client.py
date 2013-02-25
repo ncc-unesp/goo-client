@@ -248,7 +248,7 @@ class GooClient():
         job_id = args.job_id
         result = self.api.jobs(job_id).get(token=self.token)
         fields = ('id', 'name', 'app_name', 'priority', 'status', 'progress',
-                  'restart', 'ttl', 'create_time', 'modification_time')
+                  'restart', 'ttl', 'create_time', 'modification_time', 'input_objs', 'output_objs')
 
         width = 52
 
@@ -256,7 +256,14 @@ class GooClient():
         print "Job Detail".center(width)
         print "-" * width
         for f in fields:
-            print "%20s: %s" % (f, result[f])
+            print "%20s: " % f,
+            if f in ('input_objs', 'output_objs'):
+                output = []
+                for o in result[f]:
+                    output.append(o.split('/')[4].encode())
+            else:
+                output = result[f]
+            print "%s" % output
         print "-" * width
 
 
