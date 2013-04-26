@@ -95,9 +95,9 @@ class GooClient():
 
         # Field name and size in cols
         fields = [ {'id': 5},
-                   {'name': 30},
-                   {'multi_hosts': 15},
-                   {'multi_thread': 15}]
+                   {'_name': 30},
+                   {'_multi_hosts': 15},
+                   {'_multi_thread': 15}]
 
         self.output.show(fields, apps)
         return apps
