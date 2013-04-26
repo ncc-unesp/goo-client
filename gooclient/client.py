@@ -248,7 +248,7 @@ class GooClient():
         job_id = args.job_id
         result = self.api.jobs(job_id).get(token=self.token)
         fields = ('id', 'name', 'app_name', 'priority', 'status', 'progress',
-                  'restart', 'ttl', 'create_time', 'modification_time', 'input_objs', 'output_objs')
+                  'restart', 'maxtime', 'create_time', 'modification_time', 'input_objs', 'output_objs')
 
         width = 52
 
@@ -286,7 +286,7 @@ class GooClient():
 
         fields = {'name', 'app', 'hosts', 'pph', 'priority', 'restart',
                   'executable', 'args', 'inputs', 'outputs', 'checkpoints',
-                  'app_objs', 'input_objs', 'checkpoint_objs', 'ttl',
+                  'app_objs', 'input_objs', 'checkpoint_objs', 'maxtime',
                   'disk_requirement', 'memory_requirement'}
 
         values = {}
