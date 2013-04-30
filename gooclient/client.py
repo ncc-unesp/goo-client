@@ -257,7 +257,8 @@ class GooClient():
                  not v.startswith('_') and \
                v not in constant_fields and \
                v not in required_fields:
-                print "%s=%s" % (v, k)
+                comment = '' if k else '#'
+                print "%s%s=%s" % (comment, v, k)
 
         print "slug=%s" % slug
 
@@ -315,7 +316,6 @@ class GooClient():
                     print "Error: Syntax invalid"
                     print "%s has a empty value" % field
                     print "Aborting..."
-                    break
                     sys.exit()
 
                 if field in ('app_objs', 'input_objs', 'checkpoint_objs'):
@@ -324,16 +324,17 @@ class GooClient():
                     inputs = value.split(" ")
                 else:
                     values[field] = value
+
+                if inputs:
+                    obj_name = self._slugfy("%s-inputs" % values['name'])
+                    input_files = []
+                    for i in inputs:
+                        input_files.extend(glob.glob(i))
+                    args = argparse.Namespace(name=obj_name, inputs=input_files)
+                    values['input_objs'] = [self.create_object(args)]
+
             except:
                 pass
-
-        if inputs:
-            obj_name = self._slugfy("%s-inputs" % values['name'])
-            input_files = []
-            for i in inputs:
-                input_files.extend(glob.glob(i))
-            args = argparse.Namespace(name=obj_name, inputs=input_files)
-            values['input_objs'] = [self.create_object(args)]
 
         job = self.api.jobs.post(values, token=self.token)
         print "Job %s sent to queue" % job['id']
