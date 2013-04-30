@@ -251,16 +251,18 @@ class GooClient():
 
         print ""*2
         print "# Optional fields"
+        print "# Uncomment the follow lines if you want to change the"
+        print "# default values"
+        print ""
 
         for v, k in app.items():
             if v not in exclude and \
                  not v.startswith('_') and \
                v not in constant_fields and \
                v not in required_fields:
-                comment = '' if k else '#'
-                print "%s%s=%s" % (comment, v, k)
+                print "#%s=%s" % (v, k)
 
-        print "slug=%s" % slug
+        print "#slug=%s" % slug
 
     @translate_gooapi_to_gooclient_exception
     def show_job(self, args):
