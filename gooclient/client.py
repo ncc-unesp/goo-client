@@ -244,7 +244,7 @@ class GooClient():
         print ""*2
         print "# Required fields"
         print "name='%s'" % name
-        print "app_id=%s" % app_id
+        print "application=/api/%s/apps/%s/" % (CURRENT_API_VERSION, app_id)
 
         for f in required_fields:
             print "%s=%s" % (f, app[f])
@@ -305,10 +305,10 @@ class GooClient():
         cp = ConfigParser.ConfigParser()
         cp.readfp(FakeSecHead(open(template)))
 
-        fields = {'name', 'app', 'hosts', 'pph', 'priority', 'restart',
+        fields = {'name', 'application', 'hosts', 'cores_per_host', 'priority', 'restart',
                   'executable', 'args', 'inputs', 'outputs', 'checkpoints',
-                  'app_objs', 'input_objs', 'checkpoint_objs', 'maxtime',
-                  'disk_requirement', 'memory_requirement'}
+                  'input_objs', 'output_objs', 'checkpoint_objs', 'maxtime',
+                  'diskspace', 'memory'}
 
         values = {}
         for field in fields:
@@ -320,7 +320,7 @@ class GooClient():
                     print "Aborting..."
                     sys.exit()
 
-                if field in ('app_objs', 'input_objs', 'checkpoint_objs'):
+                if field in ('output_objs', 'input_objs', 'checkpoint_objs'):
                     values[field] = value.split(" ")
                 elif field is 'inputs':
                     inputs = value.split(" ")
