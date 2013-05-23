@@ -38,13 +38,11 @@ class FakeSecHead(object):
         else: return self.fp.readline()
 
 class GooClient():
-    def __init__(self, config=None):
-        if config is None:
-            return None
-
+    def __init__(self, api_uri, debug=False):
         self.output = Output()
-        self.config = config
-        self.api = API(self.config.api_uri, format="json", debug=self.config.debug)
+        self.api_uri = api_uri
+        self.debug = debug
+        self.api = API(self.api_uri, format="json", debug=self.debug)
 
     def _slugfy(self, text, separator='-'):
         ret = ""
@@ -76,11 +74,8 @@ class GooClient():
 
 
     @translate_gooapi_to_gooclient_exception
-    def request_token(self):
-        url = self.config.api_uri
-        api = API(url, auth=(self.config.username,
-                                self.config.password),
-                     debug=self.config.debug)
+    def request_token(self, username, password):
+        api = API(self.api_uri, auth=(username, password), debug=self.debug)
         token = api.auth.post({})
         self.set_token(token['token'])
         return token['token']
@@ -123,7 +118,7 @@ class GooClient():
 
         server_uri = self._get_data_proxy()
 
-        dps_api = API(server_uri, debug=self.config.debug)
+        dps_api = API(server_uri, debug=self.debug)
         dps_api.dataproxy.objects(object_id).delete(token=self.token)
 
         print "Object %s delete with success" % object_id
@@ -135,7 +130,7 @@ class GooClient():
         # Get object info
         obj = self.api.objects(object_id).get(token=self.token)
         server_uri = self._get_data_proxy()
-        dps_api = API(server_uri, debug=self.config.debug)
+        dps_api = API(server_uri, debug=self.debug)
         data = dps_api.dataproxy.objects(object_id).get(token=self.token)
         f = open(obj['name'], "w+")
         f.write(data)
@@ -159,7 +154,7 @@ class GooClient():
         object_data = {'name': object_name,
                        'file': f}
 
-        dps_api = API(server_uri, debug=self.config.debug)
+        dps_api = API(server_uri, debug=self.debug)
         result = dps_api.dataproxy.objects.post(data=object_data, token=self.token)
         f.close()
 
@@ -187,7 +182,7 @@ class GooClient():
         object_data = {'name': object_name,
                        'file': f}
 
-        dps_api = API(server_uri, debug=self.config.debug)
+        dps_api = API(server_uri, debug=self.debug)
         result = dps_api.dataproxy.objects.post(data=object_data, token=self.token)
         f.close()
 

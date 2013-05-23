@@ -2,10 +2,12 @@ import ConfigParser
 import os
 import sys
 import requests
-import getpass
 
 class GooConfig():
     config = "~/.goorc"
+    debug = False
+    api_uri = None
+    token = None
 
     def __init__(self):
         self.gooconfig = ConfigParser.ConfigParser()
@@ -20,45 +22,34 @@ class GooConfig():
             self.save_config()
 
         self.load_global()
+        self.load_token()
 
     def load_global(self):
         # Try to read global section
         try:
             self.debug = self.gooconfig.get("global", "debug")
         except ConfigParser.NoOptionError:
-            self.debug = False
+            pass
 
         try:
             self.api_uri = self.gooconfig.get("global", "api_uri")
         except ConfigParser.NoOptionError:
-            print "Warning: No server URL found."
-            self.api_uri = raw_input("URL: ")
-            self.gooconfig.set("global", "api_uri", self.api_uri)
-            self.save_config()
+            pass
 
-    def read_token(self):
+    def load_token(self):
         try:
-            token = self.gooconfig.get("auth", "token")
+            self.token = self.gooconfig.get("auth", "token")
         except ConfigParser.NoOptionError:
-            return None
-
-        return token
-
-    def get_credentials(self):
-        print "Token not found in your %s" % self.config
-        print "You need inform your login and password, to get a new token"
-        try:
-            username = raw_input("username: ")
-            password = getpass.getpass('password: ')
-        except:
-            print "You must insert a username and password."
-            print "Aborting..."
-            sys.exit()
-
-        return username, password
+            pass
 
     def save_token(self, token):
+        self.token = token
         self.gooconfig.set("auth", "token", token)
+        self.save_config()
+
+    def save_api_uri(self, api_uri):
+        self.api_uri = api_uri
+        self.gooconfig.set("global", "api_uri", api_uri)
         self.save_config()
 
     def save_config(self):
