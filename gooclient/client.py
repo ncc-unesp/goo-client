@@ -238,7 +238,7 @@ class GooClient():
 
         print ""*2
         print "# Required fields"
-        print "name='%s'" % name
+        print "name=%s" % name
         print "application=/api/%s/apps/%s/" % (CURRENT_API_VERSION, app_id)
 
         for f in required_fields:
