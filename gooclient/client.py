@@ -321,17 +321,16 @@ class GooClient():
                     inputs = value.split(" ")
                 else:
                     values[field] = value
-
-                if inputs:
-                    obj_name = self._slugfy("%s-inputs" % values['name'])
-                    input_files = []
-                    for i in inputs:
-                        input_files.extend(glob.glob(i))
-                    args = argparse.Namespace(name=obj_name, inputs=input_files)
-                    values['input_objs'] = [self.create_object(args)]
-
             except:
                 pass
+
+        if inputs:
+            obj_name = self._slugfy("%s-inputs" % values['name'])
+            input_files = []
+            for i in inputs:
+                input_files.extend(glob.glob(i))
+            args = argparse.Namespace(name=obj_name, inputs=input_files)
+            values['input_objs'] = [self.create_object(args)]
 
         job = self.api.jobs.post(values, token=self.token)
         print "Job %s sent to queue" % job['id']
