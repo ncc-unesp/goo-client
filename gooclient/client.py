@@ -41,7 +41,8 @@ class GooClient():
     def __init__(self, api_uri, debug=False):
         self.output = Output()
         self.api_uri = api_uri
-        self.debug = debug
+        if debug:
+            self.debug = sys.stderr
         self.api = API(self.api_uri, format="json", debug=self.debug)
 
     def _slugfy(self, text, separator='-'):
@@ -119,7 +120,7 @@ class GooClient():
         server_uri = self._get_data_proxy()
 
         dps_api = API(server_uri, debug=self.debug)
-        dps_api.dataproxy.objects(object_id).delete(token=self.token)
+        dps_api.dataproxy.dataobjects(object_id).delete(token=self.token)
 
         print "Object %s delete with success" % object_id
 
@@ -128,10 +129,10 @@ class GooClient():
         object_id = args.object_id
 
         # Get object info
-        obj = self.api.objects(object_id).get(token=self.token)
+        obj = self.api.dataobjects(object_id).get(token=self.token)
         server_uri = self._get_data_proxy()
         dps_api = API(server_uri, debug=self.debug)
-        data = dps_api.dataproxy.objects(object_id).get(token=self.token)
+        data = dps_api.dataproxy.dataobjects(object_id).get(token=self.token)
         f = open(obj['name'], "w+")
         f.write(data)
         f.close()
@@ -155,7 +156,7 @@ class GooClient():
                        'file': f}
 
         dps_api = API(server_uri, debug=self.debug)
-        result = dps_api.dataproxy.objects.post(data=object_data, token=self.token)
+        result = dps_api.dataproxy.dataobjects.post(data=object_data, token=self.token)
         f.close()
 
         print "%s uploaded with success" % filename
@@ -183,7 +184,7 @@ class GooClient():
                        'file': f}
 
         dps_api = API(server_uri, debug=self.debug)
-        result = dps_api.dataproxy.objects.post(data=object_data, token=self.token)
+        result = dps_api.dataproxy.dataobjects.post(data=object_data, token=self.token)
         f.close()
 
         print "%s uploaded with success" % object_name
@@ -194,7 +195,7 @@ class GooClient():
 
     @translate_gooapi_to_gooclient_exception
     def get_objects(self, args):
-        objects = self.api.objects.get(token=self.token)
+        objects = self.api.dataobjects.get(token=self.token)
         objects = objects['objects']
 
         # Field name and size in cols
