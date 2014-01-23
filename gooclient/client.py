@@ -277,7 +277,7 @@ class GooClient():
             if f in ('input_objs', 'output_objs'):
                 output = []
                 for o in result[f]:
-                    output.append(o.split('/')[4].encode())
+                    output.append(o['id'])
             else:
                 output = result[f]
             print "%s" % output
@@ -307,6 +307,7 @@ class GooClient():
                   'diskspace', 'memory'}
 
         values = {}
+        inputs = None
         for field in fields:
             try:
                 value = cp.get('template', field)
