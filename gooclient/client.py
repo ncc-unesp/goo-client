@@ -164,7 +164,7 @@ class GooClient():
 
         f = open(filename, 'rb')
         object_data = {'name': object_name,
-                       'public': public,
+                       'public': 'true' if public else 'false',
                        'file': f}
 
         dps_api = API(server_uri, debug=self.debug)
