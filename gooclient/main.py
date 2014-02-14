@@ -14,6 +14,13 @@ def main():
         config.save_api_uri(api_uri)
 
     client = GooClient(config.api_uri, config.debug)
+    cmd = GooCmdLine(client)
+    cmd.parse_args()
+
+    if cmd.args.debug:
+        client.debug = True
+
+    client.create_api()
 
     # Load global section and token, if token is not found, ask for
     # credentials and get a new token
@@ -39,6 +46,6 @@ def main():
     client.set_token(config.token)
 
     # Parse cmd line
-    cmd = GooCmdLine(client)
-    cmd.parse_args()
+    #cmd = GooCmdLine(client)
+    #cmd.parse_args()
     cmd.execute()
