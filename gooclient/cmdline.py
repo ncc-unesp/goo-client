@@ -5,11 +5,11 @@ class GooCmdLine():
     def __init__(self, api):
         self.parser = argparse.ArgumentParser(prog='PROG',
                  description='goo client command line.')
-        self.parser.add_argument('--version',
+        self.parser.add_argument('-v', '--version',
                             action='version',
                             version='%(prog)s 0.1.0')
 
-        self.parser.add_argument('--debug',
+        self.parser.add_argument('-d', '--debug',
                                  action='store_true',
                                  help="Run in debug mode")
 
