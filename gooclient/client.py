@@ -43,8 +43,8 @@ class GooClient():
         self.api_uri = api_uri
         self.debug = debug
 
-        if debug:
-            self.debug = sys.stderr
+        if self.debug:
+            self.set_debug()
 
     def _slugfy(self, text, separator='-'):
         ret = ""
@@ -63,6 +63,10 @@ class GooClient():
     @translate_gooapi_to_gooclient_exception
     def create_api(self):
         self.api = API(self.api_uri, format="json", debug=self.debug)
+
+    @translate_gooapi_to_gooclient_exception
+    def set_debug(self):
+        self.debug = sys.stderr
 
     @translate_gooapi_to_gooclient_exception
     def _get_data_proxy(self):

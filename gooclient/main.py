@@ -18,7 +18,7 @@ def main():
     cmd.parse_args()
 
     if cmd.args.debug:
-        client.debug = True
+        client.set_debug()
 
     client.create_api()
 
