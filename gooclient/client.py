@@ -41,6 +41,7 @@ class GooClient():
     def __init__(self, api_uri, debug=False):
         self.output = Output()
         self.api_uri = api_uri
+        self.debug = debug
         if debug:
             self.debug = sys.stderr
         self.api = API(self.api_uri, format="json", debug=self.debug)

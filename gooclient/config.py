@@ -27,7 +27,8 @@ class GooConfig():
     def load_global(self):
         # Try to read global section
         try:
-            self.debug = self.gooconfig.get("global", "debug")
+            self.debug = self.gooconfig.getboolean("global", "debug")
+            print self.debug
         except ConfigParser.NoOptionError:
             pass
 
