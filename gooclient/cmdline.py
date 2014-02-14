@@ -83,6 +83,9 @@ class GooCmdLine():
 
         # Objects upload
         objects_upload = objects_subparsers.add_parser('upload', help="upload an object")
+        objects_upload.add_argument('-p', '--public',
+                                    help='if this object is public. Default is false.',
+                                    action='store_true')
         objects_upload.add_argument('-o', '--object',
                                     help='object to upload',
                                     required=True)
