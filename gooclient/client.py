@@ -153,7 +153,6 @@ class GooClient():
     def upload_object(self, args):
         filename = args.object
         object_name = os.path.basename(filename)
-        public = args.public
 
         if not os.path.exists(filename):
             print "Error: Failed to open %s" % filename
@@ -164,8 +163,9 @@ class GooClient():
 
         f = open(filename, 'rb')
         object_data = {'name': object_name,
-                       'public': 'true' if public else 'false',
                        'file': f}
+        if args.public:
+            object_data['public'] = 'true'
 
         dps_api = API(server_uri, debug=self.debug)
         result = dps_api.dataproxy.dataobjects.post(data=object_data, token=self.token)
