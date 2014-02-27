@@ -153,7 +153,6 @@ class GooClient():
     def upload_object(self, args):
         filename = args.object
         object_name = os.path.basename(filename)
-        public = args.public
 
         if not os.path.exists(filename):
             print "Error: Failed to open %s" % filename
@@ -164,14 +163,17 @@ class GooClient():
 
         f = open(filename, 'rb')
         object_data = {'name': object_name,
-                       'public': 'true' if public else 'false',
                        'file': f}
+        if args.public:
+            object_data['public'] = 'true'
 
         dps_api = API(server_uri, debug=self.debug)
         result = dps_api.dataproxy.dataobjects.post(data=object_data, token=self.token)
         f.close()
 
-        print "%s uploaded with success" % filename
+        object_id = re.search(r'/api/v1/dataobjects/(\d+)/',
+                                      result['resource_uri']).group(1)
+        print "%s uploaded with success (#%s)" % (filename, object_id)
 
     @translate_gooapi_to_gooclient_exception
     def create_object(self, args):
@@ -199,7 +201,9 @@ class GooClient():
         result = dps_api.dataproxy.dataobjects.post(data=object_data, token=self.token)
         f.close()
 
-        print "%s uploaded with success" % object_name
+        object_id = re.search(r'/api/v1/dataobjects/(\d+)/',
+                                      result['resource_uri']).group(1)
+        print "%s uploaded with success (#%s)" % (object_name, object_id)
 
         # Force tempfile to be removed
         os.unlink(filepath)
@@ -347,4 +351,4 @@ class GooClient():
             values['input_objs'] = [self.create_object(args)]
 
         job = self.api.jobs.post(values, token=self.token)
-        print "Job %s sent to queue" % job['id']
+        print "Job %s sent to queue (#%d)" % (job['name'], job['id'])
