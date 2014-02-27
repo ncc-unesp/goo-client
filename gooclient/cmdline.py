@@ -1,10 +1,21 @@
 import sys
 import argparse
+import textwrap
 
 class GooCmdLine():
     def __init__(self, api):
         self.parser = argparse.ArgumentParser(prog='PROG',
-                 description='goo client command line.')
+                        formatter_class=argparse.RawDescriptionHelpFormatter,
+                        description=textwrap.dedent('goo client command line.'),
+                        epilog=textwrap.dedent('''
+                        Environment Variables:
+
+                        GOO_API_URI    = Server API endpoing
+                        USER           = User to authenticate
+                        GOO_PASSWORD   = Password used only to get API token
+
+                        Use it or configure your config file.'''))
+
         self.parser.add_argument('-v', '--version',
                             action='version',
                             version='%(prog)s 0.1.0')
