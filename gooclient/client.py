@@ -151,7 +151,7 @@ class GooClient():
         server_uri = self._get_data_proxy()
 
         dps_api = API(server_uri, debug=self.debug)
-        dps_api.dataproxy.dataobjects(object_id).delete(token=self.token)
+        dps_api.dataobjects(object_id).delete(token=self.token)
 
         print "Object %s delete with success" % object_id
 
@@ -163,7 +163,7 @@ class GooClient():
         obj = self.api.dataobjects(object_id).get(token=self.token)
         server_uri = self._get_data_proxy()
         dps_api = API(server_uri, debug=self.debug)
-        data = dps_api.dataproxy.dataobjects(object_id).get(token=self.token)
+        data = dps_api.dataobjects(object_id).get(token=self.token)
         f = open(obj['name'], "w+")
         f.write(data)
         f.close()
@@ -189,7 +189,7 @@ class GooClient():
             object_data['public'] = 'true'
 
         dps_api = API(server_uri, debug=self.debug)
-        result = dps_api.dataproxy.dataobjects.post(data=object_data, token=self.token)
+        result = dps_api.dataobjects.post(data=object_data, token=self.token)
         f.close()
 
         object_id = re.search(r'/api/v1/dataobjects/(\d+)/',
@@ -219,7 +219,7 @@ class GooClient():
                        'file': f}
 
         dps_api = API(server_uri, debug=self.debug)
-        result = dps_api.dataproxy.dataobjects.post(data=object_data, token=self.token)
+        result = dps_api.dataobjects.post(data=object_data, token=self.token)
         f.close()
 
         object_id = re.search(r'/api/v1/dataobjects/(\d+)/',
