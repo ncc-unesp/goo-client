@@ -100,6 +100,7 @@ class GooConfig():
         self.gooconfig.add_section("auth")
 
     def save(self):
-        f = open(os.path.expanduser(self.config), 'w')
-        self.gooconfig.write(f)
-        f.close()
+        filename = os.path.expanduser(self.config)
+        with open(filename, 'w') as f:
+            os.chmod(filename, 0600)
+            self.gooconfig.write(f)
