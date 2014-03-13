@@ -120,6 +120,9 @@ class GooClient():
         apps = self.api.apps.get(token=self.token)
         apps = apps['objects']
 
+        # filter out _active = False
+        apps = filter(lambda x: x['_active'], apps)
+
         # Field name and size in cols
         fields = [ {'id': 5},
                    {'_name': 30},
